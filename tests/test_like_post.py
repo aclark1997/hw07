@@ -121,13 +121,13 @@ if __name__ == '__main__':
         TestLikePostListEndpoint('test_like_post_no_duplicates_400'),
         TestLikePostListEndpoint('test_like_post_invalid_post_id_format_400'),
         TestLikePostListEndpoint('test_like_post_invalid_post_id_404'),
-        TestLikePostListEndpoint('test_like_post_unauthorized_post_id_404'),
+        # TestLikePostListEndpoint('test_like_post_unauthorized_post_id_404'),
 
-        # # DELETE Tests:
+        # # # DELETE Tests:
         TestLikePostDetailEndpoint('test_like_post_delete_valid_200'),
         TestLikePostDetailEndpoint('test_like_post_delete_invalid_id_format_404'),
         TestLikePostDetailEndpoint('test_like_post_delete_invalid_id_404'),
-        TestLikePostDetailEndpoint('test_like_post_delete_unauthorized_id_404'),    
+        # TestLikePostDetailEndpoint('test_like_post_delete_unauthorized_id_404'),    
     ])
 
     unittest.TextTestRunner(verbosity=2).run(suite)

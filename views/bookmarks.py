@@ -1,6 +1,6 @@
 from flask import Response, request
 from flask_restful import Resource
-from models import Bookmark, db
+from models import Bookmark, Post, db
 import json
 
 class BookmarksListEndpoint(Resource):
@@ -16,8 +16,26 @@ class BookmarksListEndpoint(Resource):
     def post(self):
         # create a new "bookmark" based on the data posted in the body 
         body = request.get_json()
-        print(body)
-        return Response(json.dumps({}), mimetype="application/json", status=201)
+        
+        try:
+            int(body.get('post_id'))
+        except:
+            return Response(json.dumps({}), mimetype="application/json", status=400)
+
+        posts = Post.query.filter(Post.id==body.get('post_id'));
+        try:
+            post = [post.to_dict() for post in posts][0]
+        except:
+            return Response(json.dumps({}), mimetype="application/json", status=404)
+
+        bookmark = Bookmark(self.current_user.id, body.get('post_id'))
+        
+        try:
+            db.session.add(bookmark)
+            db.session.commit()
+            return Response(json.dumps(bookmark.to_dict()), mimetype="application/json", status=201)
+        except:
+            return Response(json.dumps({}), mimetype="application/json", status=400)
 
 class BookmarkDetailEndpoint(Resource):
 
@@ -25,8 +43,15 @@ class BookmarkDetailEndpoint(Resource):
         self.current_user = current_user
     
     def delete(self, id):
-        # delete "bookmark" record where "id"=id
-        print(id)
+
+        
+        bookmark = Bookmark.query.filter(Post.id == id)
+        
+
+        if bookmark.delete() == 0:
+            return Response(json.dumps({}), mimetype="application/json", status=404)
+                
+        db.session.commit()
         return Response(json.dumps({}), mimetype="application/json", status=200)
 
 

@@ -36,22 +36,8 @@ class PostListEndpoint(Resource):
     def post(self):
         # create a new post based on the data posted in the body 
         body = request.get_json()
-
-        if body == {}:
-            return Response(json.dumps({}), mimetype="application/json", status=400)
-
-        new_post = Post(
-            image_url = body.get('image_url'),
-            user_id=self.current_user.id,
-            caption=body.get('caption'),
-            alt_text=body.get('alt_text')
-        )
-
-        db.session.add(new_post)
-        db.session.commit()
-
         print(body)  
-        return Response(json.dumps(new_post.to_dict()), mimetype="application/json", status=201)
+        return Response(json.dumps({}), mimetype="application/json", status=201)
         
 class PostDetailEndpoint(Resource):
 
@@ -62,42 +48,19 @@ class PostDetailEndpoint(Resource):
     def patch(self, id):
         # update post based on the data posted in the body 
         body = request.get_json()
-        post = Post.query.filter(Post.id==id).first()
-        if post == None or post.user.id != self.current_user.id:
-            return Response(json.dumps({}), mimetype="application/json", status=404)
-
-        post.image_url = body.get('image_url') or post.image_url
-        post.caption = body.get('caption') or post.caption
-        post.alt_text = body.get('alt_text') or post.alt_text
-
-        db.session.commit()
-        return Response(json.dumps(post.to_dict()), mimetype="application/json", status=200)
+        print(body)       
+        return Response(json.dumps({}), mimetype="application/json", status=200)
 
 
     def delete(self, id):
-        post = Post.query.filter(Post.id == id)
-        
-
-        if post.delete() == 0:
-            return Response(json.dumps({}), mimetype="application/json", status=404)
-                
-        db.session.commit()
+        # delete post where "id"=id
         return Response(json.dumps({}), mimetype="application/json", status=200)
-        
+
 
     def get(self, id):
         # get the post based on the id
         posts = Post.query.filter(Post.id==id);
-        try:
-            post = [post.to_dict() for post in posts][0]
-
-            if post.user_id not in get_authorized_user_ids(self.current_user.id):
-                return Response(json.dumps({}), mimetype="application/json", status=404)    
-
-            return Response(json.dumps(post), mimetype="application/json", status=200)
-        except:
-            return Response(json.dumps({}), mimetype="application/json", status=404)        
-        
+        return Response(json.dumps([post.to_dict() for post in posts][0]), mimetype="application/json", status=200)
 
 def initialize_routes(api):
     api.add_resource(

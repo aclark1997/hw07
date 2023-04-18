@@ -1,6 +1,6 @@
 from flask import Response, request
 from flask_restful import Resource
-from models import LikePost, db
+from models import LikePost, Post, db
 import json
 
 class PostLikesListEndpoint(Resource):
@@ -11,8 +11,28 @@ class PostLikesListEndpoint(Resource):
     def post(self):
         # create a new "like_post" based on the data posted in the body 
         body = request.get_json()
-        print(body)
-        return Response(json.dumps({}), mimetype="application/json", status=201)
+        #LikePost.query.filter(LikePost.id==0)
+
+        try:
+            int(body.get('post_id'))
+        except:
+            return Response(json.dumps({}), mimetype="application/json", status=400)
+
+        posts = Post.query.filter(Post.id==body.get('post_id'));
+        try:
+            post = [post.to_dict() for post in posts][0]
+        except:
+            return Response(json.dumps({}), mimetype="application/json", status=404)
+
+        like = LikePost(self.current_user.id, body.get('post_id'))
+        
+        try:
+            db.session.add(like)
+            db.session.commit()
+            return Response(json.dumps(like.to_dict()), mimetype="application/json", status=201)
+        except:
+            return Response(json.dumps({}), mimetype="application/json", status=400)
+        
 
 class PostLikesDetailEndpoint(Resource):
 
@@ -20,8 +40,13 @@ class PostLikesDetailEndpoint(Resource):
         self.current_user = current_user
     
     def delete(self, id):
-        # delete "like_post" where "id"=id
-        print(id)
+        like = LikePost.query.filter(Post.id == id)
+        
+
+        if like.delete() == 0:
+            return Response(json.dumps({}), mimetype="application/json", status=404)
+                
+        db.session.commit()
         return Response(json.dumps({}), mimetype="application/json", status=200)
 
 
